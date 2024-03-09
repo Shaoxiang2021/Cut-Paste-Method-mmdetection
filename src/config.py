@@ -5,7 +5,7 @@
 # 1: cut step
 # 2: only paste step
 # 3: paste step and training via mmdetection
-cut_paste_mmdetection = 2 
+cut_paste_mmdetection = 2
 
 ################### cut step - custom paramters ###################
 
