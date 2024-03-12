@@ -1,52 +1,9 @@
-
-############################### main parameter ###############################
-
-# set the step 
-# 1: cut step
-# 2: only paste step
-# 3: only train via mmdetection
-# 4: only evaluation
-# 5: (demo) paste step + train + evaluation
-cut_paste_mmdetection = 5
-
-##################### 1. cut step - custom paramters #########################
-
-# choose source objects
-SOURCE = ['cylinder', 'plate', 'usb', 'fob', 'tempos']
-
-# choose deep learning model to remove the background
-# isnet-general-use: current best model
-# u2net: general model
-# u2netp: small fast model
-SESSION = "isnet-general-use"
-
-# --------------- no need to change here -------------------------------------
-
-config_cut_parameters = {
-    'source': SOURCE,
-    'session': SESSION,
-}
-
-###############################################################################
-
-##################### 2. past step - custom paramters #########################
-
 # resolution for training
 TRAIN_RESOLUTION = (720, 540)
 # resolution of camera
 CAMERA_RESOLUTION = (1280, 960)
 
-# set folder name 
-# !!! suggestion! format for name: (number of class) _ (first letter of the class) _ (number of the images) _ (version) _ (info) !!!
-FOLDER_NAME = "5_cpuft_1000_1"
-
-# how many images should be generated (int)
-NUM_IMAGES = 1000
-
-
-# ---- if you want to change classes or parameters of the data augmentation ----
-
-config_paste_parameters = {
+config_parameters = {
 
     # general parameters
 
@@ -59,11 +16,12 @@ config_paste_parameters = {
         'tempos': 5,
         },
 
-    # how many images should be generated (int)
-    'num_images': NUM_IMAGES,
+    # root path for the source images and output path (str)
+    'source_root': "/home/tan/MA_Shaoxiang/data/synthetic_images", ##### test data augmentation in Trainig ##### color jitter and gaussian blur
+    'output_root': "/home/tan/MA_Shaoxiang/data/synthetic_images/5_cpuft_5000_ca_2", # number of class _ first letter of the class _ number of the images _ version
 
-    # format for name: number of class _ first letter of the class _ number of the images _ version _ info
-    'folder_name': FOLDER_NAME, 
+    # how many images should be generated (int)
+    'num_images': 5000,
 
     # image size for training data (int)
     'size_x': TRAIN_RESOLUTION[0],
@@ -71,8 +29,8 @@ config_paste_parameters = {
 
     # how many objects should be in one single image (int)
     # min_obj < n < max_obj
-    'min_obj': 8,
-    'max_obj': 12,
+    'min_obj': 2,
+    'max_obj': 8,
 
     # set seed for torch random (int)
     'seed': 1,
@@ -147,9 +105,9 @@ config_paste_parameters = {
         'keep_ratio': True,
 
         # augmentation parameters for torch 
-        'shadow_strength': 0.20,
-        'min_scale_factor': 1.0, 
-        'max_scale_factor': 1.4,
+        'shadow_strength': 0.25,
+        'min_scale_factor': 0.9, 
+        'max_scale_factor': 1.3,
         'max_degrees': 180, 
         'distortion_scale': 0.2,
 
@@ -157,21 +115,3 @@ config_paste_parameters = {
         }
 }
 
-###############################################################################
-
-################# 3. training step - custom paramters #########################
-
-# config file name in mmetection/configs/romafo/
-# crcnn: cascade-mask-rcnn_r50_fpn_1x_{num_images}.py
-# solov2: solov2_r50_fpn_ms-3x_{num_images}.py
-# rtmdet: rtmdet-ins_m_8xb32-300e_coco_{num_images}.py (comming soon)
-# yolact: yolact_r50_1x8_coco_{num_images}.py
-# spareinst: sparseinst_r50_iam_8xb8_ms-270k_coco_{num_images}.py (comming soon)
-
-CONFIG_NAMES = ['solov2_r50_fpn_ms-3x_1000.py', 'yolact_r50_1x8_coco_1000.py', 'cascade-mask-rcnn_r50_fpn_1x_1000.py']
-
-###############################################################################
-
-############# 4. evaluation step - custom parameters ##########################
-
-TEST_FOLDER_NAME = 'demo_1'

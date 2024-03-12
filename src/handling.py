@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import math
 from tqdm import tqdm
+from path import ROOT_DIR
 
 def get_output_paths(ctr:int, n_images:int, out_path):
 
@@ -68,3 +69,27 @@ def load_canvas(canvas_folderpath, size_x, size_y):
     canvas = np.dstack((canvas, canvas[:, :, 3]))
 
     return(canvas)
+    
+def generate_config_for_training(config_name, folder_name):
+
+    config_path = os.path.join(ROOT_DIR, 'mmdetection', 'configs', 'romafo', config_name)
+    
+    with open(config_path, 'r') as file:
+        config_content = file.readlines()
+    
+    data_root = os.path.join('..', 'data', 'synthetic_images', folder_name)
+    
+    work_dir = os.path.join('..', 'results', config_name.split('_')[0] + '_' + folder_name)
+    
+    for i, line in enumerate(config_content):
+        if 'DATA_ROOT' in line:
+            config_content[i] = f"DATA_ROOT = '{data_root}{os.sep}'\n"
+        elif 'work_dir' in line:
+            config_content[i] = f"work_dir = '{work_dir}'\n"
+        
+        # only write first 15 line, here will be improved
+        if i >= 15:
+            break  
+      
+    with open(config_path, 'w') as file:
+        file.writelines(config_content)

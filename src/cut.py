@@ -47,3 +47,5 @@ def auto_cut_object(source, session):
 
             image_removebg.save(output_image_path)
             mask.save(output_mask_path)
+        
+        print("completed ...")
