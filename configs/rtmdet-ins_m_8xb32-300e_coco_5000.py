@@ -5,12 +5,12 @@ MAX_EPOCHS = 10
 STAG_EPOCHS = 2
 INTERVAL = 5
 BATCH_SIZE = 8
-DATA_ROOT = '../data/synthetic_images/5_cpuft_5000_1/'
+DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_4/'
 
 TEST_FOLDER = 'test_usb'
 TEST_ROOT = '../data/source_images/05_test/test/'
 load_from = "../mmdetection/checkpoints/rtmdet-ins_m_8xb32-300e_coco_20221123_001039-6eba602e.pth"
-work_dir = '../results/rtmdet-ins_5_cpuft_5000_1'
+work_dir = '../results/rtmdet-ins_5_cpuft_1000_4'
 
 _base_ = '../rtmdet/rtmdet-ins_m_8xb32-300e_coco.py'
 

@@ -33,7 +33,6 @@ class AugmentationGenerator(object):
                                     v2.RandomPerspective(distortion_scale=self.distortion_scale, p=self.general_probability, interpolation=InterpolationMode.BILINEAR, fill=0),
                                     v2.RandomHorizontalFlip(p=self.general_probability),
                                     v2.RandomVerticalFlip(p=self.general_probability),
-                                    v2.ToPILImage()
                                     ])
         
         elif self.scale_strategy == 'ORIGINAL_MIX':
@@ -44,7 +43,12 @@ class AugmentationGenerator(object):
                                     v2.RandomHorizontalFlip(p=self.general_probability),
                                     v2.RandomVerticalFlip(p=self.general_probability),
                                     v2.RandomAffine(degrees=0, scale=(self.min_scale_factor, self.max_scale_factor), interpolation=InterpolationMode.BILINEAR, fill=0),
-                                    v2.ToPILImage()
+                                    ])
+        
+        # initialize transform for adding image effects
+        self.transform_image_effect = v2.Compose([
+                                        v2.ColorJitter(**self.color_jitter),
+                                        #v2.GaussianBlur(**self.gaussian_blur),
                                     ])
 
     def add_shadow(self, imgcan, mask):
@@ -139,7 +143,16 @@ class AugmentationGenerator(object):
         object_background = self.pre_roi(img, obj_choice, scale)
 
         # transform geometry 
-        img_transformed = np.array(self.transform_geometry(object_background))
+        img_transformed = self.transform_geometry(object_background)
+        img_transformed_rgb = img_transformed[:3, :, :]
+
+        # apply color jitter
+        img_transformed_rgb = self.transform_image_effect(img_transformed_rgb)
+        img_transformed[:3, :, :] = img_transformed_rgb
+
+        # convert to numpy array
+        transform_PIL = v2.ToPILImage()
+        img_transformed = np.array(transform_PIL(img_transformed))
 
         # crop the object and add in background in random position
         cnts, _ = cv2.findContours((img_transformed[:, :, 3].copy()).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

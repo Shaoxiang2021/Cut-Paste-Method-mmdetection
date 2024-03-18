@@ -14,7 +14,8 @@ class Processor(object):
         
         self.folder_name = FOLDER_NAME
         self.config_names = CONFIG_NAMES
-        self.test_folder = TEST_FOLDER_NAME
+        self.test_folders = TEST_FOLDER_NAMES
+        self.inference_folder = INFERENCE_FOLDER_NAME
         
         self.config_cut_parameters = config_cut_parameters
         self.config_paste_parameters = config_paste_parameters
@@ -35,18 +36,33 @@ class Processor(object):
         for config_name in self.config_names:
         
             print("generate config file for training")
-            generate_config_for_training(config_name, self.folder_name)
+            generate_config_for_training(config_name, self.folder_name, None)
             
             print("start to train ...")
             command_train = "python" + " " + os.path.join(ROOT_DIR, 'mmdetection', 'tools', 'train.py') + " " + os.path.join(ROOT_DIR, 'mmdetection', 'configs', 'romafo', config_name) 
             os.system(command_train)
     
-    def evaluate(self):
+    def inference(self):
         
         for config_name in self.config_names:
         
+            print("generate config file for training")
+            generate_config_for_training(config_name, self.folder_name, self.inference_folder)
+        
             print("model inferencing ...")
-            demo_prediction(self.test_folder, self.folder_name, config_name)
+            demo_prediction(self.inference_folder, self.folder_name, config_name)
+            
+    def evaluate(self):
+    
+        for config_name in self.config_names:
+        
+            for test_folder in self.test_folders:
+        
+                print("generate config file for training")
+                generate_config_for_training(config_name, self.folder_name, test_folder)
+                
+                print("model testing ...")
+                evaluate_via_test_data(self.folder_name, config_name)
           
     def __call__(self):
     
@@ -66,19 +82,26 @@ class Processor(object):
         elif self.step == 4:
             
             self.evaluate()
-        
+            
         elif self.step == 5:
             
-            """
             try:
-                self.paste()
                 self.train()
                 self.evaluate()
-                
+            
             except Exception as e:
                 print("An error occurred:", e)
-            """
+        
+        elif self.step == 6:
             
+            #try:
+                #self.paste()
+                #self.train()
+                #self.evaluate()
+                
+            #except Exception as e:
+                #print("An error occurred:", e)
+                
             self.paste()
             self.train()
             self.evaluate()

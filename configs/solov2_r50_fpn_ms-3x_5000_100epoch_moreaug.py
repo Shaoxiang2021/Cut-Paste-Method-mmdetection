@@ -1,18 +1,24 @@
 # env parameters
 MYVAR_OPTIM_LR = 1e-05
 MYVAR_OPTIM_WD = 0.0001
-MAX_EPOCHS = 10
-BATCH_SIZE = 8
-DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_1/'
+MAX_EPOCHS = 100
+STAG_EPOCHS = 20
+INTERVAL = 10
+BATCH_SIZE = 4
+DATA_ROOT = '../data/synthetic_images/5_cpuft_5000_1/'
 
 TEST_FOLDER = 'test_usb'
 TEST_ROOT = '../data/source_images/05_test/test/'
 load_from = "../mmdetection/checkpoints/solov2_r50_fpn_3x_coco_20220512_125856-fed092d4.pth"
-work_dir = '../results/solov2_5_cpuft_1000_1'
-
-
+work_dir = '../results/solov2_5_cpuft_5000_1'
 
 _base_ = '../solov2/solov2_r50_fpn_ms-3x_coco.py'
+
+default_hooks = dict(
+    checkpoint=dict(
+        interval=INTERVAL,
+        max_keep_ckpts=3  # only keep latest 3 checkpoints
+    ))
 
 # model parameters
 model = dict(mask_head=dict(num_classes=5))
@@ -20,8 +26,10 @@ model = dict(mask_head=dict(num_classes=5))
 # set classes
 metainfo = dict(classes=('cylinder', 'plate', 'usb', 'fob', 'tempos'), palatte=[(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)])
 
+# load custom files
+# custom_imports = dict(imports=["custom.augmentation"], allow_failed_imports=False)
+
 # optimizer
-# fp16 = dict(loss_scale=512.) 
 
 # optim_wrapper = dict(
 #    clip_grad=dict(max_norm=35, norm_type=2),
@@ -33,17 +41,56 @@ optim_wrapper = dict(_delete_=True, type='OptimWrapper', optimizer = dict(type='
 # param_scheduler
 # set the parameters need to see the training curve, LinearLR or MultiStepLR
 # param_scheduler = dict(_delete_=True, type='MultiStepLR', by_epoch=True, begin=0, end=10, milestones=[5, 10, 20],  gamma=0.1)
-# param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=200), dict(type='CosineAnnealingLR', T_max=6050, by_epoch=False, begin=200, end=6250)]
-param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=50), dict(type='CosineAnnealingLR', T_max=1200, by_epoch=False, begin=50, end=1250)]
+param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=1000), dict(type='CosineAnnealingLR', T_max=MAX_EPOCHS, by_epoch=True, convert_to_iter_based=True)]
+# param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=50), dict(type='CosineAnnealingLR', T_max=1200, by_epoch=False, begin=50, end=1250)]
 
 # pipline for training, validation and test
 train_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
-    dict(keep_ratio=True, scale=(1333,800), type='Resize'),
-    dict(type='RandomFlip', prob=0.5),
+    dict(type='RandomResize', scale=(1333,800), ratio_range=(0.1, 2.0), keep_ratio=True), 
+    dict(type='RandomCrop', crop_size=(1333,800)),
     dict(type='PhotoMetricDistortion', contrast_range=(0.75, 1.25), saturation_range=(0.75, 1.25)),
     dict(type='Sharpness', min_mag=0.5, max_mag=1.5),
+    dict(type='Rotate', min_mag=0.0, max_mag=30.0),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='PackDetInputs'),
+]
+
+train_pipeline_stage_II = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(
+          keep_ratio=True,
+          scales=[
+              (
+                  1333,
+                  800,
+              ),
+              (
+                  1333,
+                  768,
+              ),
+              (
+                  1333,
+                  736,
+              ),
+              (
+                  1333,
+                  704,
+              ),
+              (
+                  1333,
+                  672,
+              ),
+              (
+                  1333,
+                  640,
+              ),
+          ],
+          type='RandomChoiceResize'),
+    dict(type='YOLOXHSVRandomAug'),
+    dict(type='RandomFlip', prob=0.5),
     dict(type='PackDetInputs'),
 ]
 
@@ -82,11 +129,10 @@ test_evaluator = dict(
     outfile_prefix=work_dir)
 
 # train dataloader parameters
-train_cfg = dict(max_epochs=MAX_EPOCHS, type='EpochBasedTrainLoop', val_interval=1)
+train_cfg = dict(_delete_=True, max_epochs=MAX_EPOCHS, val_interval=INTERVAL, type='EpochBasedTrainLoop', dynamic_intervals=[(MAX_EPOCHS - STAG_EPOCHS, 1)])
 
 train_dataloader = dict(
     batch_size=BATCH_SIZE,
-    num_workers=4,
     dataset=dict(
         ann_file='train/annotations.json',
         data_prefix=dict(img='train/imgs/'),
@@ -98,7 +144,6 @@ train_dataloader = dict(
 # validation dataloader parameters
 val_dataloader = dict(
     batch_size=1,
-    num_workers=4,
     dataset=dict(
         ann_file='val/annotations.json',
         data_prefix=dict(img='val/imgs/'),
@@ -111,3 +156,10 @@ val_evaluator = dict(
     ann_file=DATA_ROOT+'val/annotations.json',
     metric='segm',
     type='CocoMetric')
+
+custom_hooks = [
+    dict(
+        type='PipelineSwitchHook',
+        switch_epoch=MAX_EPOCHS - STAG_EPOCHS,
+        switch_pipeline=train_pipeline_stage_II)
+]

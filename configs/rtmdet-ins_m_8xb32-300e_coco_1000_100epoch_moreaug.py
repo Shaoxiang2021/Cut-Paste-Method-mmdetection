@@ -1,16 +1,16 @@
 # env parameters
 MYVAR_OPTIM_LR = 1e-03
 MYVAR_OPTIM_WD = 0.0001
-MAX_EPOCHS = 10
-STAG_EPOCHS = 2
-INTERVAL = 5
+MAX_EPOCHS = 100
+STAG_EPOCHS = 10
+INTERVAL = 10
 BATCH_SIZE = 8
-DATA_ROOT = '../data/synthetic_images/5_cpuft_5000_1/'
+DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_4/'
 
 TEST_FOLDER = 'test_usb'
 TEST_ROOT = '../data/source_images/05_test/test/'
 load_from = "../mmdetection/checkpoints/rtmdet-ins_m_8xb32-300e_coco_20221123_001039-6eba602e.pth"
-work_dir = '../results/rtmdet-ins_5_cpuft_5000_1'
+work_dir = '../results/rtmdet-ins_5_cpuft_1000_4'
 
 _base_ = '../rtmdet/rtmdet-ins_m_8xb32-300e_coco.py'
 
@@ -40,7 +40,7 @@ optim_wrapper = dict(_delete_=True, type='OptimWrapper', optimizer=dict(type='Ad
 # set the parameters need to see the training curve, LinearLR or MultiStepLR
 # param_scheduler = dict(_delete_=True, type='MultiStepLR', by_epoch=True, begin=0, end=10, milestones=[5, 10, 20],  gamma=0.1)
 # param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=200), dict(type='CosineAnnealingLR', T_max=6050, by_epoch=False, begin=200, end=6250)]
-param_scheduler = [dict(type='LinearLR', start_factor=1e-05, by_epoch=False, begin=0, end=200), dict(type='CosineAnnealingLR', T_max=MAX_EPOCHS, by_epoch=True, convert_to_iter_based=True)]
+param_scheduler = [dict(type='LinearLR', start_factor=1e-05, by_epoch=False, begin=0, end=1000), dict(type='CosineAnnealingLR', T_max=MAX_EPOCHS, by_epoch=True, convert_to_iter_based=True)]
 
 # pipline for training, validation and test
 train_pipeline = [

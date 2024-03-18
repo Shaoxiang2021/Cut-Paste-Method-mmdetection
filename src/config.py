@@ -6,8 +6,9 @@
 # 2: only paste step
 # 3: only train via mmdetection
 # 4: only evaluation
-# 5: (demo) paste step + train + evaluation
-cut_paste_mmdetection = 5
+# 5: train + evaluation
+# 6: (demo) paste step + train + evaluation
+cut_paste_mmdetection = 6
 
 ##################### 1. cut step - custom paramters #########################
 
@@ -34,11 +35,11 @@ config_cut_parameters = {
 # resolution for training
 TRAIN_RESOLUTION = (720, 540)
 # resolution of camera
-CAMERA_RESOLUTION = (1280, 960)
+CAMERA_RESOLUTION = (4032, 3024)
 
 # set folder name 
 # !!! suggestion! format for name: (number of class) _ (first letter of the class) _ (number of the images) _ (version) _ (info) !!!
-FOLDER_NAME = "5_cpuft_1000_1"
+FOLDER_NAME = "5_cpuft_1000_5"
 
 # how many images should be generated (int)
 NUM_IMAGES = 1000
@@ -71,7 +72,7 @@ config_paste_parameters = {
 
     # how many objects should be in one single image (int)
     # min_obj < n < max_obj
-    'min_obj': 8,
+    'min_obj': 4,
     'max_obj': 12,
 
     # set seed for torch random (int)
@@ -83,7 +84,7 @@ config_paste_parameters = {
     # probability for the overlapping (float) (0.0 - 1.0)
     # 0: there is no overlapping
     # 1: there is no limit for adding object in one single image
-    'overlay_factor': 0.1,
+    'overlay_factor': 0.05,
 
     # value for generation_strategie (str)
     # NORMAL: generate same class, but different objects in single image
@@ -113,31 +114,31 @@ config_paste_parameters = {
         'scale_strategy': 'MIX',
 
         # for resize step in the MIX and NORMAL scale_strategie
-        'resize_in_procent': True,
+        'resize_in_procent': False,
 
         # --- using absolute px of width in camera resolution
         # object size in camera image (dict)
         # how big are the objects in camera resolution ? in px
-        #'obj_dic': {
-        #'cylinder': (268, 113),
-        #'plate':    (120, 127),
-        #'usb':      (94, 29),
-        #'fob':      (94, 29),
-        #'tempos':   (268, 113),
-        #},
+        'obj_dic': {
+        'cylinder': (1329, 544),
+        'plate':    (747, 764),
+        'usb':      (572, 164),
+        'fob':      (571, 203),
+        'tempos':   (1062, 421),
+        },
         
         # --- using procent factor of width in camera resolution
         # object size in camera image (float)
         # !!! keep_ratio must be True !!!
-        # how big are the objects in camera resolution ? estimate the size of the target in procent
+        # how big are the objects in camera resolution ? estimate the size of the target in procent # 0.21 0.1 0.075 0.09 0.22
 
-        'obj_dic': {
-        'cylinder': 0.21,
-        'plate':    0.1,
-        'usb':      0.075,
-        'fob':      0.09,
-        'tempos':   0.21,
-        },
+        #'obj_dic': {
+        #'cylinder': 0.26,
+        #'plate':    0.13,
+        #'usb':      0.13,
+        #'fob':      0.12,
+        #'tempos':   0.265,
+        #},
         
         # resolution for camera and training data
         'camera_resolution': CAMERA_RESOLUTION,
@@ -147,11 +148,22 @@ config_paste_parameters = {
         'keep_ratio': True,
 
         # augmentation parameters for torch 
-        'shadow_strength': 0.20,
-        'min_scale_factor': 1.0, 
-        'max_scale_factor': 1.4,
+        'shadow_strength': 0.25,
+        'min_scale_factor': 0.8, 
+        'max_scale_factor': 1.2,
         'max_degrees': 180, 
         'distortion_scale': 0.2,
+        
+        'color_jitter': {
+            'brightness': (1.0, 1.4), 
+            'saturation': 0.15, 
+            'hue': 0.15,
+            },
+
+        'gaussian_blur':{
+            'kernel_size': (7, 7), 
+            'sigma': (0.1, 1.0),
+        },
 
         'general_probability': 0.5,
         }
@@ -164,14 +176,18 @@ config_paste_parameters = {
 # config file name in mmetection/configs/romafo/
 # crcnn: cascade-mask-rcnn_r50_fpn_1x_{num_images}.py
 # solov2: solov2_r50_fpn_ms-3x_{num_images}.py
-# rtmdet: rtmdet-ins_m_8xb32-300e_coco_{num_images}.py (comming soon)
+# rtmdet: rtmdet-ins_m_8xb32-300e_coco_{num_images}.py
 # yolact: yolact_r50_1x8_coco_{num_images}.py
 # spareinst: sparseinst_r50_iam_8xb8_ms-270k_coco_{num_images}.py (comming soon)
 
-CONFIG_NAMES = ['solov2_r50_fpn_ms-3x_1000.py', 'yolact_r50_1x8_coco_1000.py', 'cascade-mask-rcnn_r50_fpn_1x_1000.py']
+CONFIG_NAMES = ['rtmdet-ins_m_8xb32-300e_coco_1000.py']
 
 ###############################################################################
 
 ############# 4. evaluation step - custom parameters ##########################
 
-TEST_FOLDER_NAME = 'demo_1'
+# folder path for inferece 
+INFERENCE_FOLDER_NAME = 'demo_1'
+
+# folder path for testing
+TEST_FOLDER_NAMES = ['test_1', 'test_cylinder', 'test_plate', 'test_usb']

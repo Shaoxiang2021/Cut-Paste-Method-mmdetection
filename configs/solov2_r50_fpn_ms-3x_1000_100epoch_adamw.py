@@ -1,18 +1,21 @@
 # env parameters
 MYVAR_OPTIM_LR = 1e-05
 MYVAR_OPTIM_WD = 0.0001
-MAX_EPOCHS = 10
+MAX_EPOCHS = 100
 BATCH_SIZE = 8
-DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_1/'
+DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_3/'
 
 TEST_FOLDER = 'test_usb'
 TEST_ROOT = '../data/source_images/05_test/test/'
 load_from = "../mmdetection/checkpoints/solov2_r50_fpn_3x_coco_20220512_125856-fed092d4.pth"
-work_dir = '../results/solov2_5_cpuft_1000_1'
+work_dir = '../results/solov2_5_cpuft_1000_3'
 
 
 
 _base_ = '../solov2/solov2_r50_fpn_ms-3x_coco.py'
+
+default_hooks = dict(
+    checkpoint=dict(interval=10, type='CheckpointHook'),)
 
 # model parameters
 model = dict(mask_head=dict(num_classes=5))
@@ -34,7 +37,7 @@ optim_wrapper = dict(_delete_=True, type='OptimWrapper', optimizer = dict(type='
 # set the parameters need to see the training curve, LinearLR or MultiStepLR
 # param_scheduler = dict(_delete_=True, type='MultiStepLR', by_epoch=True, begin=0, end=10, milestones=[5, 10, 20],  gamma=0.1)
 # param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=200), dict(type='CosineAnnealingLR', T_max=6050, by_epoch=False, begin=200, end=6250)]
-param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=50), dict(type='CosineAnnealingLR', T_max=1200, by_epoch=False, begin=50, end=1250)]
+param_scheduler = [dict(type='LinearLR', start_factor=1e-07, by_epoch=False, begin=0, end=50), dict(type='CosineAnnealingLR', T_max=100, by_epoch=True)]
 
 # pipline for training, validation and test
 train_pipeline = [

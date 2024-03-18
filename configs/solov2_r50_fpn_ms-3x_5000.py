@@ -1,16 +1,16 @@
-
-# load custom files
-# custom_imports = dict(imports=["custom.augmentation"], allow_failed_imports=False)
-
 # env parameters
 MYVAR_OPTIM_LR = 1e-05
 MYVAR_OPTIM_WD = 0.0001
 MAX_EPOCHS = 10
 BATCH_SIZE = 8
-DATA_ROOT = '../data/synthetic_images/5_cpuft_5000_1/'
+DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_3/'
 
+TEST_FOLDER = 'test_usb'
+TEST_ROOT = '../data/source_images/05_test/test/'
 load_from = "../mmdetection/checkpoints/solov2_r50_fpn_3x_coco_20220512_125856-fed092d4.pth"
-work_dir = '../results/solov2_5_cpuft_5000_1'
+work_dir = '../results/solov2_5_cpuft_1000_3'
+
+
 
 _base_ = '../solov2/solov2_r50_fpn_ms-3x_coco.py'
 
@@ -19,6 +19,9 @@ model = dict(mask_head=dict(num_classes=5))
 
 # set classes
 metainfo = dict(classes=('cylinder', 'plate', 'usb', 'fob', 'tempos'), palatte=[(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)])
+
+# load custom files
+# custom_imports = dict(imports=["custom.augmentation"], allow_failed_imports=False)
 
 # optimizer
 
@@ -67,18 +70,18 @@ val_pipeline = test_pipeline
 test_dataloader = dict(
     batch_size=1,
     dataset = dict(
-        ann_file='test/annotations.json',
-        data_prefix=dict(img='test/imgs/'),
-        data_root=DATA_ROOT,
+        ann_file=TEST_FOLDER+'/annotations.json',
+        data_prefix=dict(img=TEST_FOLDER+'/'),
+        data_root=TEST_ROOT,
         pipeline=test_pipeline,
         metainfo=metainfo)
         )
 
 test_evaluator = dict(
-    ann_file=DATA_ROOT+'test/annotations.json',
+    ann_file=TEST_ROOT+TEST_FOLDER+'/annotations.json',
     metric='segm',
     type='CocoMetric',
-    outfile_prefix='results/romafo/solov2_r50_cylinder_overlap/test')
+    outfile_prefix=work_dir)
 
 # train dataloader parameters
 train_cfg = dict(max_epochs=MAX_EPOCHS, type='EpochBasedTrainLoop', val_interval=1)

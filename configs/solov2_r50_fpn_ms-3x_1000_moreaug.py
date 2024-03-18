@@ -3,6 +3,7 @@ MYVAR_OPTIM_LR = 1e-05
 MYVAR_OPTIM_WD = 0.0001
 MAX_EPOCHS = 10
 BATCH_SIZE = 8
+INTERVAL = 10
 DATA_ROOT = '../data/synthetic_images/5_cpuft_1000_1/'
 
 TEST_FOLDER = 'test_usb'
@@ -13,6 +14,12 @@ work_dir = '../results/solov2_5_cpuft_1000_1'
 
 
 _base_ = '../solov2/solov2_r50_fpn_ms-3x_coco.py'
+
+default_hooks = dict(
+    checkpoint=dict(
+        interval=INTERVAL,
+        max_keep_ckpts=3  # only keep latest 3 checkpoints
+    ))
 
 # model parameters
 model = dict(mask_head=dict(num_classes=5))
@@ -28,7 +35,7 @@ metainfo = dict(classes=('cylinder', 'plate', 'usb', 'fob', 'tempos'), palatte=[
 #    optimizer=dict(lr=MYVAR_OPTIM_LR, momentum=0.9, type='SGD', weight_decay=0.0001),
 #    type='OptimWrapper')
 
-optim_wrapper = dict(_delete_=True, type='OptimWrapper', optimizer = dict(type='AdamW', lr=MYVAR_OPTIM_LR, weight_decay=MYVAR_OPTIM_WD), clip_grad=None)
+optim_wrapper = dict(_delete_=True, type='OptimWrapper', optimizer = dict(type='Adam', lr=MYVAR_OPTIM_LR, weight_decay=MYVAR_OPTIM_WD), clip_grad=None)
 
 # param_scheduler
 # set the parameters need to see the training curve, LinearLR or MultiStepLR
@@ -44,6 +51,8 @@ train_pipeline = [
     dict(type='RandomFlip', prob=0.5),
     dict(type='PhotoMetricDistortion', contrast_range=(0.75, 1.25), saturation_range=(0.75, 1.25)),
     dict(type='Sharpness', min_mag=0.5, max_mag=1.5),
+    #dict(type='Rotate', min_mag=0.0, max_mag=30.0),
+    dict(type='GeomTransform', min_mag=0.0, max_mag=0.3),
     dict(type='PackDetInputs'),
 ]
 

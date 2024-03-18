@@ -70,7 +70,7 @@ def load_canvas(canvas_folderpath, size_x, size_y):
 
     return(canvas)
     
-def generate_config_for_training(config_name, folder_name):
+def generate_config_for_training(config_name, folder_name, test_folder=None):
 
     config_path = os.path.join(ROOT_DIR, 'mmdetection', 'configs', 'romafo', config_name)
     
@@ -86,6 +86,9 @@ def generate_config_for_training(config_name, folder_name):
             config_content[i] = f"DATA_ROOT = '{data_root}{os.sep}'\n"
         elif 'work_dir' in line:
             config_content[i] = f"work_dir = '{work_dir}'\n"
+        elif 'TEST_FOLDER' in line:
+            if test_folder is not None:
+                config_content[i] = f"TEST_FOLDER = '{test_folder}'\n"
         
         # only write first 15 line, here will be improved
         if i >= 15:
