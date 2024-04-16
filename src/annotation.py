@@ -51,9 +51,8 @@ class AnnotationGenerator(object):
     def generate_info(self, info=list()):
         self.info = info
 
-    def generate_categories(self, obj_dic):
+    def generate_categories(self, obj_list):
 
-        obj_list = list(obj_dic.keys())
         for id in range(1, len(obj_list)+1):
             
             categories = copy.deepcopy(self.categories_format)
@@ -105,12 +104,12 @@ class AnnotationGenerator(object):
         self.annotations_list = list()
         self.images = dict()
 
-    def post_processing(self, obj_dic, output_root):
+    def post_processing(self, obj_list, output_root):
 
         sub_dir = ['train', 'val']
         # sub_dir = ['train', 'val', 'test']
 
-        self.generate_categories(obj_dic)
+        self.generate_categories(obj_list)
 
         for dir in sub_dir:
             folder_path = os.path.join(output_root, dir, "imgs")

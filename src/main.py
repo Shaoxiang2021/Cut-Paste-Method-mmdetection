@@ -19,8 +19,17 @@ class Processor(object):
         
         self.config_cut_parameters = config_cut_parameters
         self.config_paste_parameters = config_paste_parameters
-        
         self.step = cut_paste_mmdetection
+        
+        self.hyperparameters = dict(
+                                    myvar_optim_wd = MYVAR_OPTIM_WD,
+                                    max_epochs = MAX_EPOCHS, 
+                                    stag_epochs = STAG_EPOCHS, 
+                                    interval = INTERVAL, 
+                                    batch_size = BATCH_SIZE, 
+                                    beginn_epochs_cosin_lr = BEGINN_EPOCHS_COSIN_LR,
+                                    end_iters_linear_lr = END_ITERS_LINEAR_LR,
+                                    )
         
     def cut(self):
     
@@ -36,7 +45,7 @@ class Processor(object):
         for config_name in self.config_names:
         
             print("generate config file for training")
-            generate_config_for_training(config_name, self.folder_name, None)
+            generate_config_for_training(config_name, self.folder_name, self.hyperparameters, None)
             
             print("start to train ...")
             command_train = "python" + " " + os.path.join(ROOT_DIR, 'mmdetection', 'tools', 'train.py') + " " + os.path.join(ROOT_DIR, 'mmdetection', 'configs', 'romafo', config_name) 
@@ -47,7 +56,7 @@ class Processor(object):
         for config_name in self.config_names:
         
             print("generate config file for training")
-            generate_config_for_training(config_name, self.folder_name, self.inference_folder)
+            generate_config_for_training(config_name, self.folder_name, self.hyperparameters, self.inference_folder)
         
             print("model inferencing ...")
             demo_prediction(self.inference_folder, self.folder_name, config_name)
@@ -59,10 +68,10 @@ class Processor(object):
             for test_folder in self.test_folders:
         
                 print("generate config file for training")
-                generate_config_for_training(config_name, self.folder_name, test_folder)
+                generate_config_for_training(config_name, self.folder_name, self.hyperparameters, test_folder)
                 
                 print("model testing ...")
-                evaluate_via_test_data(self.folder_name, config_name)
+                evaluate_via_test_data(self.folder_name, config_name, self.hyperparameters['max_epochs'])
           
     def __call__(self):
     
@@ -85,12 +94,15 @@ class Processor(object):
             
         elif self.step == 5:
             
-            try:
-                self.train()
-                self.evaluate()
+            #try:
+                #self.train()
+                #self.evaluate()
             
-            except Exception as e:
-                print("An error occurred:", e)
+            #except Exception as e:
+                #print("An error occurred:", e)
+            
+            self.train()
+            self.evaluate()
         
         elif self.step == 6:
             
@@ -104,7 +116,7 @@ class Processor(object):
                 
             self.paste()
             self.train()
-            self.evaluate()
+            # self.evaluate()
                 
 if __name__ == '__main__':
 

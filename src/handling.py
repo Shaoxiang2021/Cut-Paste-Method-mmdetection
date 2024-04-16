@@ -46,9 +46,10 @@ def get_templates(objs, obj_path, train_resolution):
             # read image and store in respective vector
             
             img = cv2.cvtColor(cv2.imread(os.path.join(obj_path, obj, file_name), cv2.IMREAD_UNCHANGED), cv2.COLOR_RGB2RGBA)/255
-            
             ratio = img.shape[0]/img.shape[1]
-            obj_list.append(cv2.resize(img, (train_resolution[0], math.ceil(train_resolution[0]*ratio)), cv2.INTER_LINEAR))
+            img = cv2.resize(img, (train_resolution[0], math.ceil(train_resolution[0]*ratio)), cv2.INTER_LINEAR)
+            
+            obj_list.append(img)
             
         templates.append(obj_list)
     
@@ -62,15 +63,31 @@ def load_canvas(canvas_folderpath, size_x, size_y):
     canvas_filePath = os.path.join(canvas_folderpath, canvas_fileName)
     
     # read canvas and convert it to RGBA
-    canvas = cv2.cvtColor(cv2.imread(canvas_filePath, cv2.IMREAD_UNCHANGED), cv2.COLOR_RGB2RGBA)/255
+    # bug fixed BGR2RGBA not RGB2RGBA
+    canvas = cv2.cvtColor(cv2.imread(canvas_filePath, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGBA)/255
 
-    canvas = cv2.resize(canvas.copy(), (size_x, size_y), interpolation = cv2.INTER_NEAREST)
-    canvas[:, :, 3] = 0
-    canvas = np.dstack((canvas, canvas[:, :, 3]))
+    canvas = cv2.resize(canvas, (size_x, size_y), interpolation = cv2.INTER_NEAREST)
+    
+    # canvas augmentation
+    if np.random.rand() < 0.5:
+        flip_code = np.random.randint(-1, 2)
+        canvas = cv2.flip(canvas, flip_code)
+    
+    rgb_cavas = canvas[:, :, :3]
+    alpha_cavas = canvas[:, :, 3]
+    
+    if np.random.rand() < 0.5:
+        blur_amount = np.random.randint(1, 6)*2 + 1
+        rgb_cavas = cv2.GaussianBlur(rgb_cavas, (blur_amount, blur_amount), 0)
+    
+    mask_cavas = np.zeros_like(alpha_cavas)
+    overlay_cavas = np.zeros_like(alpha_cavas)
+    
+    canvas = np.dstack((canvas, mask_cavas, overlay_cavas))
 
     return(canvas)
     
-def generate_config_for_training(config_name, folder_name, test_folder=None):
+def generate_config_for_training(config_name, folder_name, hyperparameters, test_folder=None):
 
     config_path = os.path.join(ROOT_DIR, 'mmdetection', 'configs', 'romafo', config_name)
     
@@ -78,8 +95,15 @@ def generate_config_for_training(config_name, folder_name, test_folder=None):
         config_content = file.readlines()
     
     data_root = os.path.join('..', 'data', 'synthetic_images', folder_name)
-    
     work_dir = os.path.join('..', 'results', config_name.split('_')[0] + '_' + folder_name)
+    
+    myvar_optim_wd = hyperparameters['myvar_optim_wd']
+    max_epochs = hyperparameters['max_epochs']
+    stag_epochs = hyperparameters['stag_epochs']
+    interval = hyperparameters['interval']
+    batch_size = hyperparameters['batch_size']
+    beginn_epochs_cosin_lr = hyperparameters['beginn_epochs_cosin_lr']
+    end_iters_linear_lr = hyperparameters['end_iters_linear_lr']
     
     for i, line in enumerate(config_content):
         if 'DATA_ROOT' in line:
@@ -90,8 +114,24 @@ def generate_config_for_training(config_name, folder_name, test_folder=None):
             if test_folder is not None:
                 config_content[i] = f"TEST_FOLDER = '{test_folder}'\n"
         
+        # here for writing hyperparameters
+        elif 'MYVAR_OPTIM_WD' in line:
+            config_content[i] = f"MYVAR_OPTIM_WD = {myvar_optim_wd}\n"
+        elif 'MAX_EPOCHS' in line:
+            config_content[i] = f"MAX_EPOCHS = {max_epochs}\n"
+        elif 'STAG_EPOCHS' in line:
+            config_content[i] = f"STAG_EPOCHS = {stag_epochs}\n"
+        elif 'INTERVAL' in line:
+            config_content[i] = f"INTERVAL = {interval}\n"
+        elif 'BATCH_SIZE' in line:
+            config_content[i] = f"BATCH_SIZE = {batch_size}\n"
+        elif 'BEGINN_EPOCHS_COSIN_LR' in line:
+            config_content[i] = f"BEGINN_EPOCHS_COSIN_LR = {beginn_epochs_cosin_lr}\n"
+        elif 'END_ITERS_LINEAR_LR' in line:
+            config_content[i] = f"END_ITERS_LINEAR_LR = {end_iters_linear_lr}\n"
+        
         # only write first 15 line, here will be improved
-        if i >= 15:
+        if i >= 20:
             break  
       
     with open(config_path, 'w') as file:
