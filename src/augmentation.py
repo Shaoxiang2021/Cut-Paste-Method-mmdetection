@@ -42,7 +42,7 @@ class AugmentationGenerator(object):
     def load_source_images(self):
         
         print("initialized and loading cut images ...")
-        self.src_imgs = get_templates(self.obj_list, os.path.join(self.source_root, '04_crop'), self.train_resolution)
+        self.src_imgs = get_templates(self.obj_list, os.path.join(self.source_root, '04_crop'), self.train_resolution, self.num_source_image)
 
         if self.load_dist is True:
             self.dist_imgs = get_templates(self.dist_list, os.path.join(self.source_root, '06_distractor'), self.train_resolution)
@@ -75,7 +75,7 @@ class AugmentationGenerator(object):
         self.transform_geometry = v2.Compose([
                                     v2.ToImage(),
                                     v2.RandomRotation(degrees=self.max_degrees, interpolation=InterpolationMode.BILINEAR, fill=0),
-                                    v2.RandomPerspective(distortion_scale=self.distortion_scale, p=self.general_probability, interpolation=InterpolationMode.BILINEAR, fill=0),
+                                    #v2.RandomPerspective(distortion_scale=self.distortion_scale, p=self.general_probability, interpolation=InterpolationMode.BILINEAR, fill=0),
                                     v2.RandomHorizontalFlip(p=self.general_probability),
                                     v2.RandomVerticalFlip(p=self.general_probability),
                                     ])

@@ -126,7 +126,7 @@ class ImageGenerator(object):
 
         # copy config file for different settings
         print("copy config files for the different settings ...")
-        shutil.copy('config.py', self.output_root)
+        shutil.copy('config.py', os.path.join(self.output_root, self.folder_name + '_config.py'))
         
         # print("prepared and loading cut images ...")
         # load cuting images
@@ -145,10 +145,12 @@ class ImageGenerator(object):
         for num_image in tqdm(range(1, self.num_images+1)):
         
             # hook
-            self.load_hook(num_image)
+            if self.hook is not None:
+                self.load_hook(num_image)
             
             # load background image
-            self.imgcan = load_canvas(os.path.join(self.source_root, '01_canvas'), self.size_x, self.size_y)
+            self.imgcan = load_canvas(os.path.join(self.source_root, '01_canvas', self.canvas_folder), self.size_x, self.size_y)
+            # self.imgcan = load_canvas(os.path.join(self.source_root, '01_canvas_'), self.size_x, self.size_y)
             
             scale = None
             # choose object class and scale for 'NORMAL' strategy for the generation

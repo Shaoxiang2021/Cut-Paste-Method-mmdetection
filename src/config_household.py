@@ -6,10 +6,10 @@
 # 2: only paste step
 # 3: only train via mmdetection
 # 4: only evaluation
-# 5: only inferece (comming soon)
+# 5: only inference (comming soon)
 # 6: train + evaluation
 # 7: (demo) paste step + train + evaluation
-cut_paste_mmdetection = 7
+cut_paste_mmdetection = 4
 
 ##################### 1. cut step - custom paramters #########################
 
@@ -39,18 +39,33 @@ TRAIN_RESOLUTION = (720, 540)
 CAMERA_RESOLUTION = (1280, 960)
 
 # class for the generation
-OBJ_LIST = ['cell', 'cover', 'fuse', 'terminal']
+# OBJ_LIST = ['cableclampA', 'cableclampB', 'cover', 'batterycell']
+OBJ_LIST = ['tempos', 'fob', 'mars', 'envelope']
 
 # for resize step in the MIX and NORMAL scale_strategie
 RESIZE_IN_PROCENT = False
 
 # if you set resize in procent in true
+#OBJ_DIC = {
+#          'cableclampA':    (207, 168),
+#          'cableclampB':    (229, 114),
+#          'cover':          (205, 134),
+#          'batterycell':    (149, 44),
+#}
+
 OBJ_DIC = {
-          'cell':       (149, 44),
-          'cover':      (205, 134),
-          'fuse':       (207, 168),
-          'terminal':   (229, 114),         
+          'tempos':    (210, 101),
+          'fob':       (115, 40),
+          'mars':      (220, 61),
+          'envelope':  (420, 287),
 }
+
+#OBJ_DIC = {
+#          'tempos':    (270, 127),
+#          'fob':       (138, 49),
+#          'mars':      (250, 77),
+#          'envelope':  (535, 358),
+#}
 
 # if add distractors is needed
 ADD_DISTRACTORS = False
@@ -67,7 +82,7 @@ DIST_DIC = {
 
 # set folder name 
 # !!! suggestion! format for name: (number of class) _ (first letter of the class) _ (number of the images) _ (version) _ (info) !!!
-FOLDER_NAME = "4_ccft_1000_3_1_3_s60"
+FOLDER_NAME = "4_tfme_1000_4_0"
 
 # how many images should be generated (int)
 NUM_IMAGES = 1000
@@ -75,16 +90,9 @@ NUM_IMAGES = 1000
 # hook for generation strategy
 HOOK = {
 200: {'min_obj': 2, 'max_obj': 8, 'overlay_factor': 0.5, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
-400: {'min_obj': 14, 'max_obj': 22, 'overlay_factor': 1, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
+400: {'min_obj': 12, 'max_obj': 20, 'overlay_factor': 1, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
 800: {'min_obj': 2, 'max_obj': 8, 'overlay_factor': 0, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
 }
-
-#HOOK = {
-#200: {'min_obj': 14, 'max_obj': 22, 'overlay_factor': 0, 'use_dist': False, 'generation_strategy': 'NORMAL', 'scale_strategy': 'MIX'},
-#400: {'min_obj': 14, 'max_obj': 22, 'overlay_factor': 1, 'use_dist': False, 'generation_strategy': 'NORMAL', 'scale_strategy': 'NORMAL'},
-#600: {'min_obj': 14, 'max_obj': 22, 'overlay_factor': 1, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
-#1600: {'min_obj': 2, 'max_obj': 8, 'overlay_factor': 0, 'use_dist': False, 'generation_strategy': 'MIX', 'scale_strategy': 'MIX'},
-#}
 
 #HOOK = None
 
@@ -158,9 +166,6 @@ config_paste_parameters = {
     # parameters for data augmentation
 
     'aug_params': {
-    
-        # how many source images should be used
-        'num_source_image': 60,
 
         # roi is sometimes a little bit small, can be added more px for width and height (int)
         'correct_factor': 5,
@@ -221,7 +226,7 @@ config_paste_parameters = {
 
         'gaussian_blur':{
             'kernel_size': (7, 7), 
-            'sigma': (0.1, 1.5),
+            'sigma': (0.1, 0.5),
         },
 
         'general_probability': 0.5,
@@ -235,7 +240,7 @@ config_paste_parameters = {
 # config file name in mmetection/configs/romafo/
 # (2018) cmrcnn: cascade-mask-rcnn_r50_fpn_1x_custom.py
 # (2019) yolact: yolact_r50_1x8_coco_custom.py
-# (2020) solov2: solov2_r50_fpn_ms-3x_coco_custum.py
+# (2020) solov2: solov2_r50_fpn_ms-3x_custum.py
 # (2022) spareinst: sparseinst_r50_iam_8xb8_ms-270k_coco_custom.py
 # (2023) rtmdet: rtmdet-ins_m_8xb32-300e_coco_custom.py
 
@@ -249,15 +254,15 @@ BEGINN_EPOCHS_COSIN_LR = 5
 END_ITERS_LINEAR_LR = 200
 
 # config files put in the list
-# 'rtmdet-ins_m_8xb32-300e_coco_4_industry.py', 'solov2_r50_fpn_ms-3x_coco_4_industry.py'
-CONFIG_NAMES = ['rtmdet-ins_m_8xb32-300e_coco_4_industry.py', 'solov2_r50_fpn_ms-3x_coco_4_industry.py'] 
+# CONFIG_NAMES = ['rtmdet-ins_m_8xb32-300e_coco_4_household.py']
+CONFIG_NAMES = ['rtmdet-ins_m_8xb32-300e_coco_4_household.py', 'solov2_r50_fpn_ms-3x_coco_4_household.py']
 
 ###############################################################################
 
 ############# 4. evaluation step - custom parameters ##########################
 
-# save prediction
-save_pred = True
+# save prediction or not
+save_pred = False
 
 # folder path for inferece 
 INFERENCE_FOLDER_NAME = 'demo_1'
@@ -265,4 +270,4 @@ INFERENCE_FOLDER_NAME = 'demo_1'
 # folder path for testing
 # test_1: example for general test in karmera resolution
 # test_cylinder, test_plate, test_usb: Test dataset from paper in handy resolution
-TEST_FOLDER_NAMES = ['test_4_industry']
+TEST_FOLDER_NAMES = ['test_4_household']

@@ -20,6 +20,7 @@ class Processor(object):
         self.config_cut_parameters = config_cut_parameters
         self.config_paste_parameters = config_paste_parameters
         self.step = cut_paste_mmdetection
+        self.save_pred = save_pred
         
         self.hyperparameters = dict(
                                     myvar_optim_wd = MYVAR_OPTIM_WD,
@@ -71,7 +72,7 @@ class Processor(object):
                 generate_config_for_training(config_name, self.folder_name, self.hyperparameters, test_folder)
                 
                 print("model testing ...")
-                evaluate_via_test_data(self.folder_name, config_name, self.hyperparameters['max_epochs'])
+                evaluate_via_test_data(self.folder_name, config_name, self.hyperparameters['max_epochs'], save_pred=self.save_pred)
           
     def __call__(self):
     
@@ -94,6 +95,10 @@ class Processor(object):
             
         elif self.step == 5:
             
+            self.inference()
+            
+        elif self.step == 6:
+            
             #try:
                 #self.train()
                 #self.evaluate()
@@ -104,7 +109,7 @@ class Processor(object):
             self.train()
             self.evaluate()
         
-        elif self.step == 6:
+        elif self.step == 7:
             
             #try:
                 #self.paste()
@@ -116,7 +121,7 @@ class Processor(object):
                 
             self.paste()
             self.train()
-            # self.evaluate()
+            self.evaluate()
                 
 if __name__ == '__main__':
 

@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import math
+import random
 from tqdm import tqdm
 from path import ROOT_DIR
 
@@ -29,7 +30,7 @@ def create_directories(out_path):
         os.makedirs(mask_out_path, exist_ok=True)
         # write gitignore file to exclude synthetic img data from tracking
 
-def get_templates(objs, obj_path, train_resolution):
+def get_templates(objs, obj_path, train_resolution, num_source_image):
 
     templates = [] # empty 2d list for storing all templates (row: template_ident(e.g. metal), coloumn: corresponding template objs)
 
@@ -39,17 +40,31 @@ def get_templates(objs, obj_path, train_resolution):
 
         folder_path = os.path.join(obj_path, obj)
         file_list = os.listdir(folder_path)
-        for file_name in tqdm(file_list, total=len(file_list)):
+        
+        len_list = len(file_list)
+        if len_list >= num_source_image:
+            len_list = num_source_image
+        else:
+            pass
+        
+        source_id = 0
+        
+        for file_name in tqdm(file_list, total=len_list):
             # test if file is an .png image
             if not os.fsdecode(file_name).endswith(".png"):
                 continue
             # read image and store in respective vector
+            
+            if source_id >= num_source_image:
+                break
             
             img = cv2.cvtColor(cv2.imread(os.path.join(obj_path, obj, file_name), cv2.IMREAD_UNCHANGED), cv2.COLOR_RGB2RGBA)/255
             ratio = img.shape[0]/img.shape[1]
             img = cv2.resize(img, (train_resolution[0], math.ceil(train_resolution[0]*ratio)), cv2.INTER_LINEAR)
             
             obj_list.append(img)
+            
+            source_id += 1
             
         templates.append(obj_list)
     
@@ -69,6 +84,8 @@ def load_canvas(canvas_folderpath, size_x, size_y):
     canvas = cv2.resize(canvas, (size_x, size_y), interpolation = cv2.INTER_NEAREST)
     
     # canvas augmentation
+    
+    # random flip
     if np.random.rand() < 0.5:
         flip_code = np.random.randint(-1, 2)
         canvas = cv2.flip(canvas, flip_code)
@@ -76,14 +93,16 @@ def load_canvas(canvas_folderpath, size_x, size_y):
     rgb_cavas = canvas[:, :, :3]
     alpha_cavas = canvas[:, :, 3]
     
+    # random gaussian blur and brightness
     if np.random.rand() < 0.5:
         blur_amount = np.random.randint(1, 6)*2 + 1
         rgb_cavas = cv2.GaussianBlur(rgb_cavas, (blur_amount, blur_amount), 0)
+        rgb_cavas = np.clip(cv2.multiply(rgb_cavas, random.uniform(0.5, 1.5)), 0, 1)
     
     mask_cavas = np.zeros_like(alpha_cavas)
     overlay_cavas = np.zeros_like(alpha_cavas)
     
-    canvas = np.dstack((canvas, mask_cavas, overlay_cavas))
+    canvas = np.dstack((rgb_cavas, mask_cavas, overlay_cavas))
 
     return(canvas)
     
