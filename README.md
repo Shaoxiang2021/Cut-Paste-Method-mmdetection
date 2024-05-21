@@ -6,6 +6,7 @@ Following image show the example results of our research:
 
  -- SoloV2
 ![industry object result 1](readme/test_40.png)
+ 
  -- rtmdet 
 ![industry object result 1](readme/test_60.png)
 
