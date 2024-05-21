@@ -94,7 +94,7 @@ Copy your test images in "05_test/demo/{folder name}" folder.
 [(back to top)](#table-of-contents)
 
 
-![Good performance of cnn model via our software](/readme/test60.png)
+![Good performance of cnn model via our software](/readme/test_60.png)
 
 
 
