@@ -94,6 +94,9 @@ Copy your test images in "05_test/demo/{folder name}" folder.
 [(back to top)](#table-of-contents)
 
 
+    <center class="half">
+        <img src="./data/readme/test_60.png" width="300"/>
+    </center> 
 
 
 
