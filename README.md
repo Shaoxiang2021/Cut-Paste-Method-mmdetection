@@ -7,7 +7,7 @@ Following image show the example results of our research:
  -- SoloV2
 ![industry object result 1](readme/test_40.png)
  -- rtmdet
-![industry object result 2](readme/test_60.png)
+
 
 ## Table of contents   
 - [(1) Environment](#(1)-Environment) 
