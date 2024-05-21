@@ -94,7 +94,7 @@ Copy your test images in "05_test/demo/{folder name}" folder.
 [(back to top)](#table-of-contents)
 
 
-![Very good performance of the cnn model via demo-cut-paste-mmdetection](/data/readme/test_60.png)
+
 
 
 
