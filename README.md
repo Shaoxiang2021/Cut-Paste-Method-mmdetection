@@ -1,6 +1,14 @@
 # CP-mmdetection Demo
 
-This demo showcases how to automatically generate training data through the cut-paste method, as well as train and evaluate models for industrial applications. 
+This demo showcases how to automatically generate training data through the cut-paste method, as well as train and evaluate models for industrial applications. You can only take few photos for the target object and then run the software. After two hours you can get a excellent cnn model for the instance segmentation use case. This Software is currently only used for solid object, for not solid object is the pipeline work not so well. 
+
+Following image show the example results of my research:
+
+ -- SoloV2
+![industry object result 1](readme/test_40.png)
+ 
+ -- rtmdet 
+![industry object result 1](readme/test_60.png)
 
 ## Table of contents   
 - [(1) Environment](#(1)-Environment) 
@@ -92,7 +100,6 @@ The results will be automatically stored in the "results/{folder name}" folder.
 Copy your test images in "05_test/demo/{folder name}" folder. 
 
 [(back to top)](#table-of-contents)
-
 
 
 
