@@ -18,8 +18,8 @@ So far we have tested our pipeline with four industrial components (fuse, termin
 <br>
 We using 80 real world images to test our models and via COCO metrics for the evaluation. The results show below:
 
-<br>
 <div align="center">
+<br>
 
 | Application                     | Model | AP<sup>IoU=0,5:0,05:0,95<sup>                                   | AR<sup>max=100<sup>  |
 | ------------------------ | ---------------- | ------------------------------------ | ---------------------- |
